@@ -1,4 +1,4 @@
-$projectRoot = Split-Path $PSScriptRoot -Parent
+﻿$projectRoot = Split-Path $PSScriptRoot -Parent
 $record = Join-Path $projectRoot 'workspace\logs\processes.json'
 if (Test-Path -LiteralPath $record) {
     $saved = Get-Content -Raw -LiteralPath $record | ConvertFrom-Json

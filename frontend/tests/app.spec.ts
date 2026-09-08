@@ -9,6 +9,7 @@ test('真实浏览器：登录、导航、模型、真人语音E1、核验、建
   await page.getByLabel('密码', { exact: true }).fill('abcd@1234');
   await page.getByRole('button', { name: '登录', exact: true }).click();
   await expect(page.getByRole('heading', { name: '每一个结论，都从真实实验开始。' })).toBeVisible();
+  await expect(page.getByText('WeSpeaker 中文 ResNet34-LM', { exact: true })).toBeVisible();
   await page.screenshot({ path: '../workspace/logs/home-desktop.png', fullPage: true });
   await page.getByRole('button', { name: '系统设置', exact: true }).click();
   await expect(page.getByText('WeSpeaker 中文 ResNet34-LM', { exact: true })).toBeVisible();
@@ -29,7 +30,7 @@ test('真实浏览器：登录、导航、模型、真人语音E1、核验、建
   await expect(results.getByRole('heading', { name: /SPEAKER_01/ })).toBeVisible();
   await results.getByRole('button', { name: '试听片段' }).first().click();
   await expect.poll(async () => results.locator('audio').first().evaluate((a: HTMLAudioElement) => a.readyState), { timeout: 15000 }).toBeGreaterThan(0);
-  await results.getByLabel('人工核验结论').selectOption('正确');
+  await results.getByLabel('人工核验结论').selectOption('其它问题');
   await results.getByLabel('核验备注').fill('浏览器自动测试：真实语音链路试听按钮验证，非人工准确率结论');
   await results.getByRole('button', { name: '保存', exact: true }).click();
   await expect(results.getByText('已保存', { exact: true })).toBeVisible();
@@ -49,7 +50,7 @@ test('真实浏览器：登录、导航、模型、真人语音E1、核验、建
   await page.getByRole('button', { name: '开始实时回放实验' }).click();
   const e3 = page.locator('section.panel').filter({ has: page.getByRole('heading', { name: '2. 实时观察与指标' }) });
   await expect(e3.getByText('已完成', { exact: true })).toBeVisible({ timeout: 60000 });
-  await expect(e3.getByText('未提供人工 Ground Truth', { exact: false })).toBeVisible();
+  await expect(e3.getByText('未提供人工 Ground Truth，正式准确率和时延指标不可计算', { exact: true })).toBeVisible();
   await page.screenshot({ path: '../workspace/logs/e3-desktop.png', fullPage: true });
   await page.getByRole('button', { name: /04 综合结论与报告/ }).click();
   await page.getByRole('button', { name: '选择全部已完成实验' }).click();
@@ -75,4 +76,24 @@ test('小屏幕布局与账号退出', async ({ page }) => {
   await page.screenshot({ path: '../workspace/logs/home-mobile.png', fullPage: true });
   await page.getByRole('button', { name: '退出登录' }).click();
   await expect(page.getByRole('heading', { name: '登录工作台' })).toBeVisible();
+});
+
+test('真实 AudioWorklet → WebSocket → 模型：公开语音注入浏览器麦克风设备', async ({ page }) => {
+  await page.goto('/');
+  await page.getByLabel('密码', { exact: true }).fill('abcd@1234');
+  await page.getByRole('button', { name: '登录', exact: true }).click();
+  await page.getByRole('button', { name: '进入 A01 实验' }).click();
+  await page.getByRole('button', { name: /03 实时识别实验/ }).click();
+  await expect(page.getByLabel('目标人物声纹').locator('option')).not.toHaveCount(1);
+  await page.getByLabel('目标人物声纹').selectOption({ index: 1 });
+  await page.getByRole('button', { name: '实时麦克风', exact: true }).click();
+  await page.getByRole('button', { name: '开始麦克风实验' }).click();
+  await expect(page.getByRole('button', { name: '停止并保存' })).toBeEnabled();
+  await expect.poll(async () => page.locator('.kpis > div').first().innerText(), { timeout: 30000 }).not.toContain('—');
+  await page.getByRole('button', { name: '标记：目标开始' }).click();
+  await page.getByRole('button', { name: '停止并保存' }).click();
+  const result = page.locator('section.panel').filter({ has: page.getByRole('heading', { name: '2. 实时观察与指标' }) });
+  await expect(result.getByText('已完成', { exact: true })).toBeVisible({ timeout: 30000 });
+  await expect(result.getByRole('button', { name: '试听完整实验录音' })).toBeVisible();
+  await page.screenshot({ path: '../workspace/logs/microphone-desktop.png', fullPage: true });
 });
