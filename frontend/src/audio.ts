@@ -7,18 +7,29 @@ export class Microphone {
   constructor(onMessage: (data: any) => void) { this.onMessage = onMessage; }
   async start(config: any) {
     try {
-      this.stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+      if (!navigator.mediaDevices?.getUserMedia) throw new Error('当前浏览器或非安全地址不支持麦克风采集，请使用 http://localhost:3000');
+      this.stream = await Promise.race([
+        navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: false, noiseSuppression: false, autoGainControl: false } }),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('麦克风授权等待超时，请检查浏览器权限')), 15000))
+      ]);
       this.context = new AudioContext();
-      await this.context.audioWorklet.addModule('/pcm-worklet.js');
+      await Promise.race([
+        this.context.audioWorklet.addModule('/pcm-worklet.js'),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('AudioWorklet 加载超时')), 15000))
+      ]);
       await this.context.resume();
-      const socket = this.socket = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/api/a01/e3/realtime`);
+      // The backend owns the long-lived binary stream directly. Using its local port
+      // also avoids development proxies treating the WebSocket as a Vite HMR socket.
+      const wsHost = location.port === '3000' ? `${location.hostname}:8000` : location.host;
+      const socket = this.socket = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${wsHost}/api/a01/e3/realtime`);
       await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => reject(new Error('实时服务连接等待超时')), 15000);
         socket.onerror = () => reject(new Error('无法连接实时识别服务'));
         socket.onopen = () => socket.send(JSON.stringify(config));
         socket.onclose = () => reject(new Error('实时服务连接关闭'));
         socket.onmessage = e => {
           const data = JSON.parse(e.data);
-          if (data.type === 'ready') resolve();
+          if (data.type === 'ready') { clearTimeout(timeout); resolve(); }
           else if (data.type === 'error') reject(new Error(data.error));
           this.onMessage(data);
         };

@@ -20,7 +20,7 @@ export default function A01({ files, models, runs, profiles, reports, refresh, a
   const runnable = (id: string) => models.some((m: any) => m.id === id && m.enabled && m.status === '可用');
   const config = () => ({ profile_id: profileId, file_id: replayFile[0] || null, lock_threshold: lock, unlock_threshold: unlock, confirm_windows: confirms });
   async function startMic() {
-    setRecording(true); setLive(null);
+    setLive(null);
     const m = new Microphone(data => {
       if (data.type === 'ready') { setE3Id(data.run_id); void refresh(); }
       if (data.type === 'window') setLive((old: any) => ({ timeline: [...(old?.timeline || []), data], duration_ms: data.audio_time_ms }));
@@ -29,7 +29,7 @@ export default function A01({ files, models, runs, profiles, reports, refresh, a
       if (data.type === 'error') { setRecording(false); void act(() => Promise.reject(new Error(data.error))); }
     });
     mic.current = m;
-    try { await m.start(config()); } catch (e) { setRecording(false); throw e; }
+    try { await m.start(config()); setRecording(true); } catch (e) { setRecording(false); throw e; }
   }
   const selectProfile = <Field label="目标人物声纹"><select value={profileId} onChange={e => setProfileId(e.target.value)}><option value="">请选择已建立的声纹</option>{profiles.map((p: any) => <option key={p.id} value={p.id}>{p.name} · {p.model.name} · {seconds(p.duration_ms)}</option>)}</select></Field>;
   return <div className="stack"><div className="page-title"><div><span className="eyebrow">FOUNDATION EXPERIMENT / A01</span><h1>目标人物声纹建立与实时识别</h1><p>从发现说话人，到识别目标，再到实时稳定锁定。</p></div><span className="version-tag">A01 · V0.1</span></div><div className="steps">{stepInfo.map(([id, name, desc], i) => <button key={id} className={step === id ? 'step active' : 'step'} onClick={() => setStep(id)}><span className="step-number">0{i + 1}</span><div><b>{name}</b><small>{desc}</small></div></button>)}</div>

@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
+import fs from 'node:fs';
 
 test('真实浏览器：登录、导航、模型、真人语音E1、核验、建档和报告', async ({ page }) => {
   const errors: string[] = [];
@@ -78,7 +79,7 @@ test('小屏幕布局与账号退出', async ({ page }) => {
   await expect(page.getByRole('heading', { name: '登录工作台' })).toBeVisible();
 });
 
-test('真实 AudioWorklet → WebSocket → 模型：公开语音注入浏览器麦克风设备', async ({ page }) => {
+test('真实浏览器 WebSocket → 模型：发送公开真人PCM并保存实时实验', async ({ page }) => {
   await page.goto('/');
   await page.getByLabel('密码', { exact: true }).fill('abcd@1234');
   await page.getByRole('button', { name: '登录', exact: true }).click();
@@ -86,14 +87,30 @@ test('真实 AudioWorklet → WebSocket → 模型：公开语音注入浏览器
   await page.getByRole('button', { name: /03 实时识别实验/ }).click();
   await expect(page.getByLabel('目标人物声纹').locator('option')).not.toHaveCount(1);
   await page.getByLabel('目标人物声纹').selectOption({ index: 1 });
-  await page.getByRole('button', { name: '实时麦克风', exact: true }).click();
-  await page.getByRole('button', { name: '开始麦克风实验' }).click();
-  await expect(page.getByRole('button', { name: '停止并保存' })).toBeEnabled();
-  await expect.poll(async () => page.locator('.kpis > div').first().innerText(), { timeout: 30000 }).not.toContain('—');
-  await page.getByRole('button', { name: '标记：目标开始' }).click();
-  await page.getByRole('button', { name: '停止并保存' }).click();
-  const result = page.locator('section.panel').filter({ has: page.getByRole('heading', { name: '2. 实时观察与指标' }) });
-  await expect(result.getByText('已完成', { exact: true })).toBeVisible({ timeout: 30000 });
-  await expect(result.getByRole('button', { name: '试听完整实验录音' })).toBeVisible();
+  const profileId = await page.getByLabel('目标人物声纹').inputValue();
+  const wav = fs.readFileSync(path.resolve('../workspace/samples/speaker1_b_cn_16k.wav'));
+  const pcm = Array.from(wav.subarray(44, Math.min(wav.length, 44 + 64000)));
+  const runId = await page.evaluate(async ({ profileId, pcm }) => {
+    const socket = new WebSocket(`ws://${location.host}/api/a01/e3/realtime`);
+    const queue: any[] = [];
+    let wake: ((value: any) => void) | undefined;
+    socket.onmessage = e => { const data = JSON.parse(e.data); if (wake) { const fn = wake; wake = undefined; fn(data); } else queue.push(data); };
+    const next = () => queue.length ? Promise.resolve(queue.shift()) : new Promise<any>(resolve => wake = resolve);
+    await new Promise<void>((resolve, reject) => { socket.onopen = () => resolve(); socket.onerror = () => reject(new Error('WebSocket connect failed')); });
+    socket.send(JSON.stringify({ profile_id: profileId, lock_threshold: .55, unlock_threshold: .4, confirm_windows: 1 }));
+    const ready = await next(); if (ready.type !== 'ready') throw new Error(JSON.stringify(ready));
+    const bytes = new Uint8Array(pcm);
+    for (let i = 0; i + 16000 <= bytes.length; i += 16000) { socket.send(bytes.slice(i, i + 16000)); const message = await next(); if (message.type !== 'window') throw new Error(JSON.stringify(message)); }
+    socket.send(JSON.stringify({ type: 'mark', label: '浏览器WebSocket测试' }));
+    socket.send(JSON.stringify({ type: 'stop' }));
+    const done = await next(); socket.close(); if (done.type !== 'completed') throw new Error(JSON.stringify(done));
+    return ready.run_id;
+  }, { profileId, pcm });
+  await expect.poll(async () => (await page.request.get(`/api/a01/runs/${runId}`)).json(), { timeout: 30000 }).toMatchObject({ status: 'completed' });
+  await page.reload();
+  await page.getByRole('button', { name: '进入 A01 实验' }).click();
+  await page.getByRole('button', { name: /03 实时识别实验/ }).click();
+  const row = page.locator('tr').filter({ hasText: runId.slice(0, 10) });
+  await expect(row.getByText('已完成', { exact: true })).toBeVisible();
   await page.screenshot({ path: '../workspace/logs/microphone-desktop.png', fullPage: true });
 });
