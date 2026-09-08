@@ -1,0 +1,789 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>妙悟·实时认知智能实验室</title>
+<style>
+:root{
+  --bg:#f4f6f9;--panel:#fff;--ink:#172033;--muted:#667085;--line:#d9e0ea;
+  --navy:#0f2b5b;--blue:#2457d6;--blue2:#edf3ff;--green:#11845b;--green2:#edf8f3;
+  --amber:#b86b0c;--red:#c83e3e;--shadow:0 6px 18px rgba(15,43,91,.05)
+}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:"Microsoft YaHei","Segoe UI",Arial,sans-serif}
+button,input,select,textarea{font:inherit}button{cursor:pointer}
+
+/* 登录 */
+.login-page{min-height:100vh;display:grid;place-items:center;background:radial-gradient(circle at 25% 15%,rgba(36,87,214,.08),transparent 28%),linear-gradient(180deg,#f8fafc,#f1f4f8)}
+.login-card{width:410px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 18px 55px rgba(15,43,91,.10);padding:28px}
+.login-brand{display:flex;align-items:center;gap:12px;margin-bottom:23px}.login-logo,.logo{width:34px;height:34px;border-radius:8px;background:linear-gradient(145deg,var(--navy),var(--blue));position:relative}
+.login-logo:after,.logo:after{content:"";position:absolute;left:9px;top:8px;width:15px;height:15px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:skew(-13deg)}
+.login-card h1{font-size:20px;margin:0;color:var(--navy)}.login-card .sub{font-size:10px;color:var(--muted);margin-top:4px}
+.login-field{margin:12px 0}.login-field label{display:block;font-size:10px;color:#475467;margin-bottom:5px}.login-field input{width:100%;height:39px;border:1px solid var(--line);border-radius:7px;padding:0 10px;background:#fcfdff}
+.login-btn{width:100%;height:40px;border:0;border-radius:7px;background:var(--blue);color:#fff;font-weight:700;margin-top:8px}.login-hint{margin-top:13px;padding:9px 10px;border:1px solid #e1e7ef;background:#f8fafc;border-radius:7px;font-size:9px;color:#667085}.login-error{height:18px;color:var(--red);font-size:9px;margin-top:4px}
+
+/* 主框架 */
+#app{display:none;min-height:100vh}.topbar{height:62px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 20px;position:sticky;top:0;z-index:20}
+.brand{display:flex;align-items:center;gap:10px}.logo{width:28px;height:28px;border-radius:6px}.brand h2{font-size:16px;margin:0}.brand small{display:block;color:var(--muted);font-size:9px;margin-top:2px}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:7px}.btn{height:32px;border:1px solid var(--line);border-radius:7px;background:#fff;padding:0 10px;color:#344054;font-size:10px;font-weight:700}.btn:hover{background:#fafbfc;border-color:#bcc7d6}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.sm{height:26px;padding:0 8px;font-size:9px}.btn.danger{color:var(--red)}
+.shell{display:grid;grid-template-columns:280px minmax(0,1fr)}.sidebar{height:calc(100vh - 62px);position:sticky;top:62px;overflow:auto;background:#fbfcfe;border-right:1px solid var(--line);padding:12px}
+.side-home{display:flex;justify-content:space-between;padding:9px 8px;font-size:11px;margin-bottom:5px;cursor:pointer;border-radius:6px}.side-home:hover,.side-home.active,.nav-item:hover,.nav-item.active{background:var(--blue2);color:var(--navy);font-weight:700}
+.nav-label{font-size:9px;color:#98a2b3;letter-spacing:.12em;padding:12px 8px 5px}.nav-group{border:1px solid #e1e6ee;border-radius:8px;background:#fff;overflow:hidden;margin-bottom:10px}.nav-group-head{padding:9px 10px;border-bottom:1px solid #eef1f5;display:flex;justify-content:space-between;font-size:10px}.nav-list{padding:5px}
+.nav-item{display:grid;grid-template-columns:35px 1fr auto;gap:6px;padding:8px 7px;cursor:pointer;border-radius:6px}.nav-item b{font:10px Consolas,monospace;color:#667085}.nav-item span{font-size:10px;line-height:1.35}.nav-item i{font-style:normal;font-size:8px;color:var(--green)}
+.main{padding:18px 20px 34px;min-width:0}.page{display:none}.page.active{display:block}
+.hero{display:flex;justify-content:space-between;gap:18px;margin-bottom:13px}.hero h2{font-size:20px;color:var(--navy);margin:0 0 5px}.hero p{margin:0;max-width:980px;font-size:10px;color:var(--muted);line-height:1.65}.chips{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.chip{font-size:8.5px;padding:5px 7px;background:#fff;border:1px solid var(--line);border-radius:6px;color:#475467}
+.panel{background:#fff;border:1px solid var(--line);border-radius:9px;box-shadow:var(--shadow)}.ph{padding:10px 12px;border-bottom:1px solid #edf0f5;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.ph h3{font-size:12px;margin:0}.ph p{font-size:9px;color:var(--muted);margin:3px 0 0;line-height:1.5}.pb{padding:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.mt{margin-top:12px}
+.note{padding:9px 10px;border:1px solid #d8e3f5;background:#f8fbff;border-radius:7px;color:#475467;font-size:9px;line-height:1.6}.good{color:var(--green);font-weight:700}.warn{color:var(--amber);font-weight:700}
+.kvgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.kv{border:1px solid #e1e7ef;border-radius:7px;padding:8px}.kv b{display:block;font-size:9px}.kv span{display:block;font-size:8px;color:#667085;margin-top:3px;line-height:1.5}
+.data-table{width:100%;border-collapse:collapse;font-size:9px}.data-table th,.data-table td{padding:7px 8px;border-bottom:1px solid #edf0f5;text-align:left;vertical-align:middle}.data-table th{background:#fafbfc;color:#667085}
+
+/* 首页 */
+.home-kicker{padding:11px 12px;border-left:3px solid var(--blue);background:#fff;border-top:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line);border-radius:0 8px 8px 0;font-size:10px;line-height:1.65}.home-card{min-height:128px}.home-card h3{font-size:12px;margin:0 0 6px}.home-card p{font-size:9px;color:#667085;line-height:1.6;margin:0}.progress{height:6px;background:#edf0f5;border-radius:5px;overflow:hidden;margin:10px 0}.progress i{display:block;height:100%;width:10%;background:var(--blue)}.mini-list{font-size:9px;color:#475467;line-height:1.8}
+
+/* A01 */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}.step{background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px;min-height:78px;cursor:pointer}.step.active{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue2)}.step small{display:block;font-size:8px;color:#98a2b3}.step b{display:block;font-size:11px;margin:3px 0}.step em{display:block;font-size:8.5px;line-height:1.45;color:#667085;font-style:normal}.a01sec{display:none}.a01sec.active{display:block}
+.section-title{font-size:10px;font-weight:700;margin:3px 0 7px;color:#344054}.radio-cards{display:grid;gap:7px}.radio-card{display:flex;gap:8px;align-items:flex-start;border:1px solid #e0e6ee;border-radius:7px;padding:9px;background:#fcfdff}.radio-card b{display:block;font-size:9px}.radio-card span{display:block;font-size:8px;color:#667085;margin-top:3px;line-height:1.45}
+.form-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.field{border:1px solid #e1e7ef;border-radius:7px;padding:8px;background:#fcfdff}.field label{display:block;font-size:8px;color:#98a2b3;margin-bottom:5px}.field select,.field input{width:100%;border:0;background:transparent;outline:none;font-size:9px;color:#172033}
+.upload-line{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:9px;border:1px dashed #bcc8d8;border-radius:7px;background:#fafcff}.upload-line input{font-size:9px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.kpi{border:1px solid #e1e7ef;border-radius:7px;padding:8px;border-left:3px solid var(--blue)}.kpi small{display:block;color:#667085;font-size:8px}.kpi b{display:block;font-size:16px;margin-top:3px}.result-box{border-left:3px solid var(--green);background:#f2faf6;border-radius:0 7px 7px 0;padding:9px 10px;font-size:9px;line-height:1.6}
+.timeline{height:96px;border:1px solid #e0e6ee;border-radius:7px;position:relative;background:repeating-linear-gradient(90deg,#fafbfc 0,#fafbfc 1px,transparent 1px,transparent 10%);overflow:hidden}.seg{position:absolute;height:22px;border-radius:4px;padding:4px 6px;font-size:8px;white-space:nowrap;overflow:hidden}.target{background:#eaf0ff;color:#2457d6}.other{background:#edf8f3;color:#087853}.uncertain{background:#fff5e7;color:#a05a00}
+.compare-table td.best{background:#eaf7f1;color:#087853;font-weight:700}.report-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.analysis-toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 10px;background:#f8fafc;border:1px solid #e2e7ee;border-radius:7px}.analysis-toolbar span{font-size:9px;color:#667085}.assistant-result{display:none;margin-top:10px;border:1px solid #cdd9ee;background:#fbfdff;border-radius:8px;padding:11px}.assistant-result.show{display:block}.assistant-result h4{margin:0 0 7px;font-size:11px;color:var(--navy)}.assistant-result p,.assistant-result li{font-size:9px;line-height:1.7;color:#475467}.assistant-meta{font-size:8px;color:#98a2b3;margin-bottom:7px}
+
+/* 数据仓/设置 */
+.manage-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}.manage-card{border:1px solid var(--line);background:#fff;border-radius:8px;padding:10px;cursor:pointer}.manage-card.active{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue2)}.manage-card b{display:block;font-size:10px}.manage-card small{display:block;font-size:8px;color:#667085;margin-top:3px}.manage-sec{display:none}.manage-sec.active{display:block}
+.settings-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}.settings-card{border:1px solid var(--line);background:#fff;border-radius:8px;padding:11px;cursor:pointer}.settings-card.active{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue2)}.settings-card b{display:block;font-size:10px}.settings-card small{display:block;color:#667085;font-size:8px;margin-top:3px}.settings-sec{display:none}.settings-sec.active{display:block}
+.agent-box{border:1px solid #dbe3ef;background:#fbfdff;border-radius:8px;padding:10px}.agent-box textarea{width:100%;min-height:100px;border:1px solid var(--line);border-radius:7px;padding:8px;font-size:9px;line-height:1.6}.agent-box select,.agent-box input{width:100%;height:32px;border:1px solid var(--line);border-radius:6px;padding:0 8px;font-size:9px}
+.user-badge{font-size:8px;padding:3px 6px;border-radius:4px;background:#eaf7f1;color:#087853}
+.placeholder{text-align:center;padding:70px 20px;border:1px dashed #cbd5e1;border-radius:9px;background:#fff;color:#667085}
+
+/* modal */
+.modal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.38);z-index:60;align-items:center;justify-content:center}.modal.show{display:flex}.modalbox{width:440px;max-width:calc(100vw - 40px);background:white;border-radius:10px;padding:16px;box-shadow:0 22px 70px rgba(0,0,0,.2)}.modalbox h3{margin:0 0 10px;font-size:13px}.modalbox label{display:block;font-size:9px;color:#667085;margin:8px 0}.modalbox input,.modalbox select{width:100%;height:32px;margin-top:4px;border:1px solid var(--line);border-radius:6px;padding:0 8px}.modal-actions{display:flex;justify-content:flex-end;gap:7px;margin-top:12px}
+.toast{display:none;position:fixed;right:20px;bottom:20px;background:#172033;color:#fff;padding:10px 12px;border-radius:7px;font-size:9px;z-index:70}.toast.show{display:block}
+
+.model-access-switch{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.access-option{display:flex;gap:8px;align-items:flex-start;border:1px solid var(--line);border-radius:8px;padding:9px;background:#fcfdff;cursor:pointer}
+.access-option.active{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue2);background:#f8fbff}
+.access-option b{display:block;font-size:10px}.access-option span{display:block;font-size:8px;color:#667085;line-height:1.5;margin-top:3px}
+.model-test-box{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;padding:9px 10px;border:1px solid #d8e3f5;background:#f8fbff;border-radius:7px}
+.model-test-box b{display:block;font-size:9px}.model-test-box span{display:block;font-size:8px;color:#667085;margin-top:2px}
+
+@media(max-width:1200px){.shell{grid-template-columns:235px 1fr}.steps{grid-template-columns:1fr 1fr}.grid2,.grid3{grid-template-columns:1fr}.form-row{grid-template-columns:1fr 1fr}.manage-cards,.settings-cards{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<section class="login-page" id="loginPage">
+  <div class="login-card">
+    <div class="login-brand"><div class="login-logo"></div><div><h1>妙悟·实时认知智能实验室</h1><div class="sub">CIS Architecture Spike 实验验证工作台</div></div></div>
+    <div class="login-field"><label>用户名</label><input id="loginUser" value="admin"/></div>
+    <div class="login-field"><label>密码</label><input id="loginPass" type="password" value="abcd@1234"/></div>
+    <button class="login-btn" id="loginBtn">登录</button>
+    <div class="login-error" id="loginError"></div>
+    <div class="login-hint">默认用户：admin　默认密码：abcd@1234</div>
+  </div>
+</section>
+
+<div id="app">
+<header class="topbar">
+  <div class="brand"><div class="logo"></div><div><h2>妙悟·实时认知智能实验室</h2><small>实时认知智能构型 · Architecture Spike · V0.1</small></div></div>
+  <div class="top-actions">
+    <button class="btn" data-page="warehouse">实验数据仓</button>
+    <button class="btn" data-page="settings">系统设置</button>
+    <button class="btn" id="logoutBtn">退出</button>
+  </div>
+</header>
+
+<div class="shell">
+<aside class="sidebar">
+  <div class="side-home active" data-page="home"><span>首页</span><span>实验总览</span></div>
+
+  <div class="nav-label">基础能力实验</div>
+  <div class="nav-group">
+    <div class="nav-list" id="navA"></div>
+  </div>
+
+  <div class="nav-label">认知能力实验</div>
+  <div class="nav-group">
+    <div class="nav-list" id="navB"></div>
+  </div>
+</aside>
+
+<main class="main">
+
+<section class="page active" id="page-home">
+  <div class="hero"><div><h2>首页</h2><p>V0.1 先把 A01 的实验方法、操作和结论闭环打通；其它实验只保留目的明确的占位项，后续逐个设计、开发和验收。</p></div></div>
+  <div class="home-kicker"><b>V0.1 当前目标：</b>先把“目标人物声纹建立与实时识别”这一项实验真正做实：能上传、试听、配置、运行、多轮比较，并由智能助手形成综合建议。</div>
+  <div class="grid3 mt">
+    <div class="panel home-card"><div class="pb"><h3>A01 · 当前重点</h3><p>目标人物声纹建立与实时识别。</p><div class="progress"><i></i></div><div class="mini-list">① 说话人发现实验<br/>② 目标人物识别实验<br/>③ 实时识别实验<br/>④ 综合结论与报告</div><button class="btn primary mt" data-page="a01">进入 A01</button></div></div>
+    <div class="panel home-card"><div class="pb"><h3>实验数据</h3><p>上传过的录音可反复使用；每次实验自动保存记录。</p><div class="mini-list mt">录音文件：<b id="homeFileCount">0</b><br/>实验记录：<b id="homeRunCount">0</b><br/>已生成报告：<b id="homeReportCount">0</b></div><button class="btn mt" data-page="warehouse">查看实验数据仓</button></div></div>
+    <div class="panel home-card"><div class="pb"><h3>辅助分析智能助手</h3><p>在 A01 第 04 步，对选中的多轮实验结果进行综合分析和建议。</p><div class="mini-list mt">当前助手：<b id="homeAgentName">实验分析助手</b><br/>当前模型：<b id="homeAgentModel">未配置</b></div><button class="btn mt" data-page="settings">系统设置</button></div></div>
+  </div>
+</section>
+
+<section class="page" id="page-a01">
+  <div class="hero">
+    <div><h2>A01 · 目标人物声纹建立与实时识别</h2><p>三个实验问题依次回答：多人会议里能不能把人分清楚；选定目标人物后能不能在其它录音里认出来；进入实时运行后能不能快速、稳定锁定这个人。</p></div>
+    <div class="chips"><span class="chip">说话人发现</span><span class="chip">目标人物识别</span><span class="chip">实时识别</span></div>
+  </div>
+  <div class="steps" id="a01Steps">
+    <div class="step active" data-step="e1"><small>01</small><b>说话人发现实验</b><em>哪种方法能把多人会议里的不同说话人分得最准？</em></div>
+    <div class="step" data-step="e2"><small>02</small><b>目标人物识别实验</b><em>选定目标人物后，在其它会议录音里能不能准确识别？</em></div>
+    <div class="step" data-step="e3"><small>03</small><b>实时识别实验</b><em>目标人物一开口，能否快速锁定、稳定保持并正确解锁？</em></div>
+    <div class="step" data-step="e4"><small>04</small><b>综合结论与报告</b><em>选择多轮实验结果，交给智能助手综合分析并形成最终报告。</em></div>
+  </div>
+
+  <div class="a01sec active" id="a01-e1">
+    <div class="panel">
+      <div class="ph"><div><h3>1. 实验输入</h3><p>以前上传过的录音直接在列表中选择；需要新录音时继续上传即可。</p></div></div>
+      <div class="pb">
+        <div class="upload-line"><input id="e1Upload" type="file" accept="audio/*" multiple/><button class="btn primary" id="e1SaveUpload">上传录音</button></div>
+        <table class="data-table mt" id="e1FileTable"></table>
+      </div>
+    </div>
+
+    <div class="grid2 mt">
+      <div class="panel">
+        <div class="ph"><div><h3>2. 选择实验方案</h3><p>只保留和说话人发现直接相关的方法与必要参数。</p></div></div>
+        <div class="pb">
+          <div class="section-title">方法</div>
+          <div class="radio-cards">
+            <label class="radio-card"><input type="radio" name="e1route" value="FunASR + CAM++ + 聚类" checked><div><b>FunASR + CAM++ + 聚类</b><span>轻量本地路线。</span></div></label>
+            <label class="radio-card"><input type="radio" name="e1route" value="pyannote 说话人分离"><div><b>pyannote 说话人分离</b><span>完整说话人分离路线。</span></div></label>
+            <label class="radio-card"><input type="radio" name="e1route" value="WeSpeaker + 聚类"><div><b>WeSpeaker + 聚类</b><span>说话人嵌入后进行聚类。</span></div></label>
+          </div>
+          <div class="section-title">必要参数</div>
+          <div class="form-row">
+            <div class="field"><label>预期说话人数</label><select id="e1SpeakerCount"><option>自动判断</option><option>2人</option><option>3人</option><option>4人</option><option>5人及以上</option></select></div>
+            <div class="field"><label>聚类阈值</label><input id="e1Threshold" value="0.65"/></div>
+            <div class="field"><label>最短有效语音</label><select id="e1MinSpeech"><option>1.0 秒</option><option>0.5 秒</option><option>1.5 秒</option><option>2.0 秒</option></select></div>
+          </div>
+          <div class="note mt">正式开发时，不同方法只显示它真正需要的参数。</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="ph"><div><h3>3. 开始实验</h3><p>调整方法或参数后再运行一轮，系统自动保留本轮实验结果。</p></div></div>
+        <div class="pb">
+          <div class="kvgrid"><div class="kv"><b>当前输入</b><span id="e1CurrentFile">尚未选择</span></div><div class="kv"><b>当前方法</b><span id="e1CurrentRoute">FunASR + CAM++ + 聚类</span></div><div class="kv"><b>本轮参数</b><span id="e1CurrentParams">自动人数 / 阈值0.65 / 最短1.0秒</span></div><div class="kv"><b>实验目的</b><span>比较不同配置下的说话人发现效果。</span></div></div>
+          <button class="btn primary mt" id="e1Start">开始实验</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel mt">
+      <div class="ph"><div><h3>4. 结果与人工试听核验</h3><p>说话人结果必须能逐个试听，便于发现“拆错、合错”等真实问题。</p></div></div>
+      <div class="pb">
+        <div class="kpis"><div class="kpi"><small>发现说话人数</small><b id="e1Detected">—</b></div><div class="kpi"><small>有效语音片段</small><b id="e1Segments">—</b></div><div class="kpi"><small>运行耗时</small><b id="e1Latency">—</b></div><div class="kpi"><small>人工核验</small><b id="e1Manual">—</b></div></div>
+        <table class="data-table mt" id="speakerResultTable"><tr><th>说话人</th><th>有效语音</th><th>片段数</th><th>试听</th><th>人工核验</th></tr><tr><td colspan="5" style="color:#98a2b3">开始实验后显示结果</td></tr></table>
+      </div>
+    </div>
+
+    <div class="panel mt">
+      <div class="ph"><div><h3>5. 历次实验结果</h3><p>每调一次配置、运行一次，增加一条记录。综合分析统一放到第 04 步。</p></div></div>
+      <div class="pb"><table class="data-table compare-table" id="e1RunTable"></table></div>
+    </div>
+  </div>
+
+  <div class="a01sec" id="a01-e2">
+    <div class="grid2">
+      <div class="panel">
+        <div class="ph"><div><h3>1. 选定目标人物</h3><p>从 E1 结果中试听并选择；同一人被拆成多个 Speaker 时允许合并。</p></div></div>
+        <div class="pb">
+          <table class="data-table"><tr><th>选择</th><th>说话人</th><th>试听</th></tr><tr><td><input type="checkbox"></td><td>说话人 01</td><td><button class="btn sm play-e1-sample" data-start="2" data-end="8">试听</button></td></tr><tr><td><input type="checkbox" checked></td><td>说话人 02</td><td><button class="btn sm play-e1-sample" data-start="10" data-end="16">试听</button></td></tr><tr><td><input type="checkbox"></td><td>说话人 03</td><td><button class="btn sm play-e1-sample" data-start="18" data-end="24">试听</button></td></tr></table>
+          <div class="form-row mt"><div class="field"><label>目标人物名称</label><input id="targetName" value="Leader-A"/></div><div class="field"><label>建档语音</label><select><option>约30秒清晰语音</option><option>约60秒清晰语音</option></select></div><div class="field"><label>样本处理</label><select><option>排除重叠/低质量片段</option><option>仅排除重叠片段</option></select></div></div>
+          <button class="btn primary mt" id="saveTarget">保存目标人物</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ph"><div><h3>2. 选择测试录音</h3><p>可以继续上传，也可以直接勾选历史录音。</p></div></div>
+        <div class="pb"><div class="upload-line"><input id="e2Upload" type="file" accept="audio/*" multiple><button class="btn" id="e2SaveUpload">上传更多录音</button></div><table class="data-table mt" id="e2FileTable"></table></div>
+      </div>
+    </div>
+    <div class="grid2 mt">
+      <div class="panel">
+        <div class="ph"><div><h3>3. 识别方案</h3><p>只调整识别模型和相似度阈值。</p></div></div>
+        <div class="pb"><div class="form-row"><div class="field"><label>说话人识别模型</label><select id="e2Model"><option>WeSpeaker ECAPA</option><option>CAM++</option></select></div><div class="field"><label>相似度阈值</label><input id="e2Threshold" value="0.78"/></div><div class="field"><label>低于阈值</label><select><option>判定为非目标人物</option><option>标记为不确定</option></select></div></div><button class="btn primary mt" id="e2Start">开始实验</button></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><div><h3>4. 本轮结果</h3></div></div><div class="pb"><div class="kpis"><div class="kpi"><small>测试录音</small><b id="e2N">—</b></div><div class="kpi"><small>识别正确</small><b id="e2Correct">—</b></div><div class="kpi"><small>误识别</small><b id="e2False">—</b></div><div class="kpi"><small>平均相似度</small><b id="e2Score">—</b></div></div></div>
+      </div>
+    </div>
+    <div class="panel mt"><div class="ph"><div><h3>5. 逐录音核验</h3><p>每份录音可试听被识别出的目标片段。</p></div></div><div class="pb"><table class="data-table" id="e2ResultTable"><tr><th>录音</th><th>识别结果</th><th>最高相似度</th><th>目标片段</th><th>人工核验</th></tr><tr><td colspan="5" style="color:#98a2b3">开始实验后显示结果</td></tr></table></div></div>
+    <div class="panel mt"><div class="ph"><div><h3>6. 历次实验结果</h3></div></div><div class="pb"><table class="data-table" id="e2RunTable"></table></div></div>
+  </div>
+
+  <div class="a01sec" id="a01-e3">
+    <div class="grid2">
+      <div class="panel"><div class="ph"><div><h3>1. 使用 E2 的识别配置</h3></div></div><div class="pb"><div class="kvgrid"><div class="kv"><b>目标人物</b><span id="e3Target">Leader-A</span></div><div class="kv"><b>识别模型</b><span id="e3Model">WeSpeaker ECAPA</span></div><div class="kv"><b>识别阈值</b><span id="e3Threshold">0.78</span></div><div class="kv"><b>说明</b><span>本步骤只研究实时锁定，不重新做一套模型选择。</span></div></div></div></div>
+      <div class="panel"><div class="ph"><div><h3>2. 实时锁定参数</h3></div></div><div class="pb"><div class="form-row"><div class="field"><label>锁定阈值</label><input id="lockTh" value="0.83"></div><div class="field"><label>解锁阈值</label><input id="unlockTh" value="0.68"></div><div class="field"><label>连续确认窗口</label><select id="confirmWin"><option>2次</option><option>1次</option><option>3次</option></select></div></div><button class="btn primary mt" id="e3Start">开始实验</button></div></div>
+    </div>
+    <div class="panel mt"><div class="ph"><div><h3>3. 实时锁定过程</h3></div></div><div class="pb">
+      <div class="timeline"><div class="seg other" style="left:4%;top:14px;width:18%">其他人</div><div class="seg target" style="left:23%;top:44px;width:22%">目标人物 · 锁定</div><div class="seg uncertain" style="left:46%;top:14px;width:10%">切换</div><div class="seg other" style="left:57%;top:44px;width:17%">其他人</div><div class="seg target" style="left:75%;top:14px;width:20%">目标人物 · 重新锁定</div></div>
+      <div class="kpis mt"><div class="kpi"><small>首次锁定 P95</small><b id="lockP95">—</b></div><div class="kpi"><small>误锁次数</small><b id="falseLock">—</b></div><div class="kpi"><small>重新锁定 P95</small><b id="relockP95">—</b></div><div class="kpi"><small>锁定稳定性</small><b id="lockStable">—</b></div></div>
+    </div></div>
+    <div class="panel mt"><div class="ph"><div><h3>4. 历次实验结果</h3></div></div><div class="pb"><table class="data-table" id="e3RunTable"></table></div></div>
+  </div>
+
+  <div class="a01sec" id="a01-e4">
+    <div class="hero" style="margin-bottom:10px"><div><h2 style="font-size:16px">A01 · 综合结论与报告</h2><p>这里统一查看 E1、E2、E3 的多轮实验记录。勾选你认可、希望纳入判断的实验轮次，再交给“辅助分析智能助手”综合分析。</p></div></div>
+    <div class="panel">
+      <div class="ph"><div><h3>1. 选择用于综合分析的实验结果</h3><p>默认显示所有历史轮次，可分别勾选 E1 / E2 / E3 的若干结果。</p></div><button class="btn" id="selectAllRuns">全选</button></div>
+      <div class="pb" id="analysisRuns"></div>
+    </div>
+    <div class="panel mt">
+      <div class="ph"><div><h3>2. 智能综合分析</h3><p>系统会把选中的实验配置、指标、人工核验结果一起交给系统设置中配置的“辅助分析智能助手”。</p></div></div>
+      <div class="pb">
+        <div class="analysis-toolbar"><span>分析助手：<b id="analysisAgentName">实验分析助手</b>　模型：<b id="analysisAgentModel">未配置</b></span><button class="btn primary" id="runAnalysis">综合分析</button></div>
+        <div class="assistant-result" id="assistantResult"></div>
+      </div>
+    </div>
+    <div class="panel mt">
+      <div class="ph"><div><h3>3. A01 综合报告</h3><p>综合报告由“选中的实验结果 + 智能分析结论 + 最终技术建议”组成。</p></div></div>
+      <div class="pb">
+        <div class="report-actions"><button class="btn primary" id="downloadSceneMd">下载 A01 综合实验报告</button><button class="btn" id="downloadSceneCsv">下载所选实验数据</button><button class="btn" id="downloadSceneJson">下载实验证据</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="page" id="page-warehouse">
+  <div class="hero"><div><h2>实验数据仓</h2><p>保持简单：保存实验文件、实验记录和已经生成的综合报告。</p></div></div>
+  <div class="manage-cards" id="warehouseCards">
+    <div class="manage-card active" data-sec="files"><b>实验文件</b><small>会议录音等可反复使用</small></div>
+    <div class="manage-card" data-sec="runs"><b>实验记录</b><small>E1 / E2 / E3 每轮实验</small></div>
+    <div class="manage-card" data-sec="reports"><b>实验报告</b><small>生成后的综合报告</small></div>
+  </div>
+  <div class="manage-sec active" id="warehouse-files"><div class="panel"><div class="ph"><div><h3>实验文件</h3></div></div><div class="pb"><table class="data-table" id="warehouseFileTable"></table></div></div></div>
+  <div class="manage-sec" id="warehouse-runs"><div class="panel"><div class="ph"><div><h3>实验记录</h3></div></div><div class="pb"><table class="data-table" id="warehouseRunTable"></table></div></div></div>
+  <div class="manage-sec" id="warehouse-reports"><div class="panel"><div class="ph"><div><h3>实验报告</h3></div></div><div class="pb"><table class="data-table" id="warehouseReportTable"></table></div></div></div>
+</section>
+
+<section class="page" id="page-settings">
+  <div class="hero"><div><h2>系统设置</h2><p>只保留三类设置：模型注册、用户管理、智能体设置。</p></div></div>
+  <div class="settings-cards" id="settingsCards">
+    <div class="settings-card active" data-sec="models"><b>模型注册</b><small>新增、修改、测试验证模型</small></div>
+    <div class="settings-card" data-sec="users"><b>用户管理</b><small>账号、角色、启用状态</small></div>
+    <div class="settings-card" data-sec="agent"><b>智能体设置</b><small>配置辅助分析智能助手</small></div>
+  </div>
+
+  <div class="settings-sec active" id="settings-models">
+    <div class="panel">
+      <div class="ph">
+        <div>
+          <h3>模型注册</h3>
+          <p>V0.1 只区分两种接入方式：① 本地模型：由实验平台进程直接加载运行；② 模型服务：通过 API 调用。不要把“模型能力”和“接入方式”混在一起。</p>
+        </div>
+        <div class="report-actions" style="margin-top:0">
+          <button class="btn primary" id="newLocalModelBtn">+ 注册本地模型</button>
+          <button class="btn" id="newModelServiceBtn">+ 注册模型服务</button>
+        </div>
+      </div>
+      <div class="pb">
+        <div class="note" style="margin-bottom:12px">
+          <b>本地模型：</b>仅用于当前真正会在本机直接加载的语音类模型：流式语音识别、说话人发现、目标说话人识别。<br/>
+          <b>模型服务：</b>用于通过 API 调用的大语言模型 / 多模态模型。按 Provider 管理连接，再维护该 Provider 下可用的模型名称。
+        </div>
+
+        <div class="section-title">本地模型</div>
+        <table class="data-table" id="localModelTable"></table>
+
+        <div class="section-title" style="margin-top:16px">模型服务</div>
+        <table class="data-table" id="modelServiceTable"></table>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-sec" id="settings-users">
+    <div class="panel"><div class="ph"><div><h3>用户管理</h3></div><button class="btn" id="newUserBtn">+ 新增用户</button></div><div class="pb"><table class="data-table" id="userTable"></table></div></div>
+  </div>
+  <div class="settings-sec" id="settings-agent">
+    <div class="panel"><div class="ph"><div><h3>辅助分析智能助手</h3><p>用于 A01 第 04 步以及后续其它场景的实验结果综合分析。</p></div></div><div class="pb">
+      <div class="agent-box">
+        <div class="grid2">
+          <div><label style="font-size:9px;color:#667085">智能体名称</label><input id="agentName" value="实验分析助手"/></div>
+          <div><label style="font-size:9px;color:#667085">分析模型</label><select id="agentModel"></select></div>
+        </div>
+        <div class="grid2 mt">
+          <div><label style="font-size:9px;color:#667085">温度</label><input id="agentTemp" value="0.2"/></div>
+          <div><label style="font-size:9px;color:#667085">最大输出长度</label><input id="agentMax" value="3000"/></div>
+        </div>
+        <label style="display:block;font-size:9px;color:#667085;margin-top:10px">分析提示词</label>
+        <textarea id="agentPrompt">你是CIS Architecture Spike实验分析助手。请基于选中的多轮实验数据进行比较，识别技术路线优劣、参数敏感性、人工核验中的异常和适用边界，并给出简洁、可执行的推荐技术配置。不要只复述指标，要解释为什么这样选。</textarea>
+        <div class="report-actions"><button class="btn primary" id="saveAgent">保存智能体设置</button><button class="btn" id="testAgent">测试智能体</button></div>
+      </div>
+    </div></div>
+  </div>
+</section>
+
+<section class="page" id="page-later"><div class="placeholder"><h3 id="laterTitle">后续实验</h3><p id="laterPurpose">当前只把 A01 梳理清楚；其它实验只做目的明确的占位，后续逐项设计、开发、验收。</p><p style="font-size:9px;color:#98a2b3;margin-top:12px">V0.1 不实现该实验页面。</p></div></section>
+</main>
+</div>
+</div>
+
+<div class="modal" id="localModelModal">
+  <div class="modalbox" style="width:500px">
+    <h3 id="localModelModalTitle">注册本地模型</h3>
+    <input type="hidden" id="localModelEditIndex" value="-1"/>
+
+    <div class="note" style="margin-bottom:10px">
+      本地模型指：<b>由实验平台所在机器直接加载并执行的模型</b>。不包括 HTTP 服务，也不包括大语言模型 / 多模态大模型。
+    </div>
+
+    <div class="grid2">
+      <label>模型名称<input id="localName" placeholder="例如：Paraformer Streaming"/></label>
+      <label>能力类型
+        <select id="localCapability">
+          <option>流式语音识别</option>
+          <option>说话人发现</option>
+          <option>目标说话人识别</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="grid2">
+      <label>加载方式
+        <select id="localLoadMode">
+          <option>Python 模块</option>
+          <option>命令行进程</option>
+        </select>
+      </label>
+      <label>运行设备
+        <select id="localDevice">
+          <option>自动</option>
+          <option>CPU</option>
+          <option>CUDA GPU</option>
+          <option>NPU</option>
+        </select>
+      </label>
+    </div>
+
+    <label>模型路径 / 模型标识<input id="localPath" placeholder="例如：D:\models\paraformer 或 paraformer-zh-streaming"/></label>
+    <label>备注<input id="localNote" placeholder="版本、依赖、使用限制等"/></label>
+
+    <div class="model-test-box">
+      <div><b>本地加载测试</b><span>正式开发时应真正尝试加载模型，并返回成功/失败和错误信息。</span></div>
+      <button class="btn" id="testLocalModelBtn">测试加载</button>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn" id="cancelLocalModel">取消</button>
+      <button class="btn primary" id="saveLocalModel">保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modelServiceModal">
+  <div class="modalbox" style="width:520px">
+    <h3 id="modelServiceModalTitle">注册模型服务</h3>
+    <input type="hidden" id="modelServiceEditIndex" value="-1"/>
+
+    <div class="note" style="margin-bottom:10px">
+      模型服务按 <b>Provider</b> 管理连接。先配置 Provider / API 地址 / API Key，再填写或选择该 Provider 下可用的模型名称。
+    </div>
+
+    <div class="grid2">
+      <label>Provider
+        <select id="serviceProvider">
+          <option>OpenAI 兼容服务</option>
+          <option>OpenAI</option>
+          <option>DeepSeek</option>
+          <option>MiniMax</option>
+          <option>自定义</option>
+        </select>
+      </label>
+      <label>服务名称<input id="serviceName" placeholder="例如：公司测试大模型服务"/></label>
+    </div>
+
+    <label>API 地址<input id="serviceBaseUrl" placeholder="例如：https://api.example.com/v1"/></label>
+
+    <div class="grid2">
+      <label>API Key<input id="serviceApiKey" type="password" placeholder="正式开发需安全保存，不在列表中明文显示"/></label>
+      <label>请求超时（秒）<input id="serviceTimeout" value="30"/></label>
+    </div>
+
+    <label>可用模型名称
+      <input id="serviceModels" placeholder="可输入多个，用逗号分隔，例如：qwen3.6-35b-a3b, deepseek-v4-flash"/>
+    </label>
+
+    <label>默认模型
+      <input id="serviceDefaultModel" placeholder="例如：qwen3.6-35b-a3b"/>
+    </label>
+
+    <label>备注<input id="serviceNote" placeholder="用途、限流、环境说明等"/></label>
+
+    <div class="model-test-box">
+      <div><b>服务测试</b><span>正式开发时应测试 API 连通性，并对默认模型发起一次最小请求。</span></div>
+      <button class="btn" id="testModelServiceBtn">测试服务</button>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn" id="cancelModelService">取消</button>
+      <button class="btn primary" id="saveModelService">保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="userModal"><div class="modalbox">
+  <h3>新增用户</h3>
+  <label>用户名<input id="newUsername"/></label><label>密码<input id="newPassword"/></label>
+  <label>角色<select id="newRole"><option>管理员</option><option>实验人员</option><option>只读</option></select></label>
+  <div class="modal-actions"><button class="btn" id="cancelUser">取消</button><button class="btn primary" id="saveUser">保存</button></div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1500)}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+
+/* 登录 */
+$('#loginBtn').onclick=()=>{if($('#loginUser').value==='admin'&&$('#loginPass').value==='abcd@1234'){localStorage.setItem('miaowu_session','admin');$('#loginPage').style.display='none';$('#app').style.display='block';refreshHome()}else $('#loginError').textContent='用户名或密码错误'};
+$('#logoutBtn').onclick=()=>{localStorage.removeItem('miaowu_session');location.reload()};
+
+/* 左侧实验目录：恢复为纯实验导航 */
+const navA=[
+['A01','目标人物声纹建立与实时识别'],
+['A02','流式语音实时识别'],
+['A03','复杂声音场景多目标人物混合识别'],
+['A05','实时图像 + 音频多模态实验']
+];
+const navB=[
+['B01','控制环路实验'],
+['B02','预测式认知与持续修正实验'],
+['B03','实时本体增量状态实验'],
+['B04','跨会议记忆与认知演化实验']
+];
+const experimentPurposes={
+'A02':'验证从持续音频输入到 Partial / Final 文本输出的真实流式识别能力，重点看识别准确率、首字延迟、最终结果延迟和修正稳定性。',
+'A03':'验证多人、打断、重叠讲话等复杂声音环境下，系统能否同时区分多个目标人物，避免人物身份和后续认知链被污染。',
+'A05':'验证实时屏幕/图像信息与语音信息能否正确对齐和联合理解，解决“这个数字、这张图、左边这个模块”等现场指代问题。',
+'B01':'验证事件控制、快速判断、认知决策等不同时间尺度环路如何被触发、并发运行和相互协同，同时保证快环不被慢环阻塞。',
+'B02':'验证目标人物尚未说完时系统能否提前预测意图，并随着新语音持续修正、推翻或取消之前的判断。',
+'B03':'验证事件到来后实时本体能否只更新受影响的当前状态，并支持 Tentative、Confirmed、Superseded、Invalidated 等修正过程。',
+'B04':'验证多场会议中的事实记忆如何逐步积累为有证据、可修正的长期专业认知，而不是每场会议后简单追加人物标签。'
+};
+function renderNav(arr,id){
+  $('#'+id).innerHTML=arr.map(x=>`<div class="nav-item" data-exp="${x[0]}"><b>${x[0]}</b><span>${x[1]}</span><i>${x[0]==='A01'?'已设计':'占位'}</i></div>`).join('');
+  $$(`#${id} .nav-item`).forEach(n=>n.onclick=()=>{
+    if(n.dataset.exp==='A01'){
+      showPage('a01');
+    }else{
+      $$('.page').forEach(p=>p.classList.remove('active'));
+      $('#page-later').classList.add('active');
+      $('#laterTitle').textContent=n.dataset.exp+' · '+n.querySelector('span').textContent;
+      $('#laterPurpose').textContent=experimentPurposes[n.dataset.exp]||'该实验目的尚未梳理清楚，当前不进入设计。';
+    }
+  });
+}
+renderNav(navA,'navA');renderNav(navB,'navB');
+
+function showPage(id){$$('.page').forEach(p=>p.classList.remove('active'));$$('.side-home,.nav-item').forEach(n=>n.classList.remove('active'));$('#page-'+id).classList.add('active');const h=$(`[data-page="${id}"]`);if(h)h.classList.add('active');if(id==='a01')$('[data-exp="A01"]').classList.add('active');window.scrollTo({top:0,behavior:'smooth'});if(id==='warehouse'){renderFiles();renderRunTables();renderReports()}if(id==='settings'){renderModelRegistry();renderUsers();renderAgent()}if(id==='home')refreshHome()}
+$$('[data-page]').forEach(n=>n.onclick=()=>showPage(n.dataset.page));
+
+/* A01 steps */
+$$('#a01Steps .step').forEach(s=>s.onclick=()=>{$$('#a01Steps .step').forEach(x=>x.classList.remove('active'));s.classList.add('active');$$('.a01sec').forEach(x=>x.classList.remove('active'));$('#a01-'+s.dataset.step).classList.add('active');if(s.dataset.step==='e4')renderAnalysisRuns();window.scrollTo({top:0,behavior:'smooth'})});
+
+/* 数据仓 tabs */
+$$('#warehouseCards .manage-card').forEach(c=>c.onclick=()=>{$$('#warehouseCards .manage-card').forEach(x=>x.classList.remove('active'));c.classList.add('active');$$('#page-warehouse .manage-sec').forEach(x=>x.classList.remove('active'));$('#warehouse-'+c.dataset.sec).classList.add('active')});
+/* 设置 tabs */
+$$('#settingsCards .settings-card').forEach(c=>c.onclick=()=>{$$('#settingsCards .settings-card').forEach(x=>x.classList.remove('active'));c.classList.add('active');$$('#page-settings .settings-sec').forEach(x=>x.classList.remove('active'));$('#settings-'+c.dataset.sec).classList.add('active')});
+
+/* IndexedDB 文件 */
+const DB='miaowu_lab_v4',STORE='files';
+function openDB(){return new Promise((resolve,reject)=>{const r=indexedDB.open(DB,1);r.onupgradeneeded=e=>{const db=e.target.result;if(!db.objectStoreNames.contains(STORE))db.createObjectStore(STORE,{keyPath:'id'})};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
+async function allFiles(){const db=await openDB();return new Promise((resolve,reject)=>{const r=db.transaction(STORE).objectStore(STORE).getAll();r.onsuccess=()=>resolve(r.result||[]);r.onerror=()=>reject(r.error)})}
+async function saveFiles(files){const db=await openDB(),tx=db.transaction(STORE,'readwrite'),st=tx.objectStore(STORE);for(const f of files)st.put({id:'F-'+Date.now()+'-'+Math.random().toString(16).slice(2,6),name:f.name,size:f.size,created:new Date().toISOString(),blob:f});return new Promise(res=>tx.oncomplete=res)}
+async function getFile(id){const db=await openDB();return new Promise(res=>{const r=db.transaction(STORE).objectStore(STORE).get(id);r.onsuccess=()=>res(r.result)})}
+async function playFile(id,start=0,end=null){const f=await getFile(id);if(!f)return;const u=URL.createObjectURL(f.blob),a=new Audio(u);a.currentTime=start;a.play();if(end!==null){const fn=()=>{if(a.currentTime>=end){a.pause();a.removeEventListener('timeupdate',fn)}};a.addEventListener('timeupdate',fn)}}
+let selectedE1File='',selectedE2Files=new Set();
+async function renderFiles(){
+ const files=(await allFiles()).sort((a,b)=>b.created.localeCompare(a.created));
+ let e1='<tr><th>本轮使用</th><th>录音文件</th><th>大小</th><th>上传时间</th><th>试听</th></tr>',e2='<tr><th>用于测试</th><th>录音文件</th><th>大小</th><th>试听</th></tr>',wh='<tr><th>文件编号</th><th>录音文件</th><th>大小</th><th>上传时间</th><th>试听</th></tr>';
+ files.forEach(f=>{e1+=`<tr><td><input type="radio" name="e1file" value="${f.id}" ${selectedE1File===f.id?'checked':''}></td><td>${esc(f.name)}</td><td>${(f.size/1048576).toFixed(2)} MB</td><td>${f.created.slice(0,16).replace('T',' ')}</td><td><button class="btn sm playfile" data-id="${f.id}">试听</button></td></tr>`;e2+=`<tr><td><input type="checkbox" class="e2file" value="${f.id}" ${selectedE2Files.has(f.id)?'checked':''}></td><td>${esc(f.name)}</td><td>${(f.size/1048576).toFixed(2)} MB</td><td><button class="btn sm playfile" data-id="${f.id}">试听</button></td></tr>`;wh+=`<tr><td>${f.id}</td><td>${esc(f.name)}</td><td>${(f.size/1048576).toFixed(2)} MB</td><td>${f.created.slice(0,16).replace('T',' ')}</td><td><button class="btn sm playfile" data-id="${f.id}">试听</button></td></tr>`});
+ if(!files.length){e1+='<tr><td colspan="5">暂无录音，请先上传。</td></tr>';e2+='<tr><td colspan="4">暂无录音，请先上传。</td></tr>';wh+='<tr><td colspan="5">暂无文件</td></tr>'}
+ $('#e1FileTable').innerHTML=e1;$('#e2FileTable').innerHTML=e2;$('#warehouseFileTable').innerHTML=wh;
+ $$('input[name="e1file"]').forEach(r=>r.onchange=async()=>{selectedE1File=r.value;const f=await getFile(r.value);$('#e1CurrentFile').textContent=f?.name||'尚未选择'});
+ $$('.e2file').forEach(c=>c.onchange=()=>{c.checked?selectedE2Files.add(c.value):selectedE2Files.delete(c.value)});
+ $$('.playfile').forEach(b=>b.onclick=()=>playFile(b.dataset.id));refreshHome();
+}
+$('#e1SaveUpload').onclick=async()=>{const fs=[...$('#e1Upload').files];if(!fs.length){toast('请选择录音文件');return}await saveFiles(fs);await renderFiles();toast('录音上传成功')};
+$('#e2SaveUpload').onclick=async()=>{const fs=[...$('#e2Upload').files];if(!fs.length){toast('请选择录音文件');return}await saveFiles(fs);await renderFiles();toast('录音上传成功')};
+
+/* Run */
+function getRuns(){return JSON.parse(localStorage.getItem('miaowu_runs_v4')||'[]')}
+function putRun(r){let x=getRuns();r.id='R-'+Date.now()+'-'+Math.random().toString(16).slice(2,5);x.unshift(r);localStorage.setItem('miaowu_runs_v4',JSON.stringify(x));renderRunTables();refreshHome()}
+function renderRunTables(){
+ const runs=getRuns();
+ let all='<tr><th>时间</th><th>实验</th><th>输入</th><th>方案</th><th>关键结果</th></tr>';runs.forEach(r=>all+=`<tr><td>${esc(r.time)}</td><td>${r.exp}</td><td>${esc(r.input)}</td><td>${esc(r.route)}</td><td>${esc(r.result)}</td></tr>`);if(!runs.length)all+='<tr><td colspan="5">暂无记录</td></tr>';$('#warehouseRunTable').innerHTML=all;
+ ['A01-E1','A01-E2','A01-E3'].forEach((exp,idx)=>{const rows=runs.filter(r=>r.exp===exp);let h= idx===0?'<tr><th>时间</th><th>输入</th><th>方法</th><th>参数</th><th>结果</th></tr>':'<tr><th>时间</th><th>输入</th><th>方案</th><th>参数</th><th>结果</th></tr>';rows.forEach(r=>h+=`<tr><td>${esc(r.time)}</td><td>${esc(r.input)}</td><td>${esc(r.route)}</td><td>${esc(r.params||'')}</td><td>${esc(r.result)}</td></tr>`);if(!rows.length)h+='<tr><td colspan="5">暂无实验记录</td></tr>';$('#e'+(idx+1)+'RunTable').innerHTML=h});
+}
+renderRunTables();
+
+/* E1 */
+function updateE1Summary(){const route=$('input[name="e1route"]:checked')?.value||'';$('#e1CurrentRoute').textContent=route;$('#e1CurrentParams').textContent=`${$('#e1SpeakerCount').value} / 阈值${$('#e1Threshold').value} / 最短${$('#e1MinSpeech').value}`}
+$$('input[name="e1route"],#e1SpeakerCount,#e1Threshold,#e1MinSpeech').forEach(x=>x.onchange=updateE1Summary);
+$('#e1Start').onclick=async()=>{if(!selectedE1File){toast('请先选择本轮录音');return}const f=await getFile(selectedE1File),route=$('input[name="e1route"]:checked').value;$('#e1Detected').textContent='4人';$('#e1Segments').textContent='37段';$('#e1Latency').textContent=route.includes('pyannote')?'8.2秒':'4.6秒';$('#e1Manual').textContent='待核验';$('#speakerResultTable').innerHTML=`<tr><th>说话人</th><th>有效语音</th><th>片段数</th><th>试听</th><th>人工核验</th></tr>${[1,2,3,4].map((n,i)=>`<tr><td>说话人 ${String(n).padStart(2,'0')}</td><td>${['12分34秒','8分17秒','5分43秒','1分08秒'][i]}</td><td>${[14,11,8,4][i]}</td><td><button class="btn sm sample" data-s="${2+i*8}" data-e="${8+i*8}">试听</button></td><td><select><option>正确</option><option>同一人被拆分</option><option>多人被误合并</option></select></td></tr>`).join('')}`;$$('.sample').forEach(b=>b.onclick=()=>playFile(selectedE1File,Number(b.dataset.s),Number(b.dataset.e)));putRun({time:new Date().toLocaleString(),exp:'A01-E1',input:f?.name||'',route,params:$('#e1CurrentParams').textContent,result:'发现4人 / 37段 / 人工待核验'});toast('E1 实验完成')};
+
+/* E2 */
+$('#saveTarget').onclick=()=>{localStorage.setItem('miaowu_target_name',$('#targetName').value);$('#e3Target').textContent=$('#targetName').value;toast('目标人物已保存')};
+$('#e2Start').onclick=async()=>{if(!selectedE2Files.size){toast('请先选择测试录音');return}let files=[];for(const id of selectedE2Files){const f=await getFile(id);if(f)files.push(f)}$('#e2N').textContent=files.length;$('#e2Correct').textContent=Math.max(files.length-1,0);$('#e2False').textContent=files.length?1:0;$('#e2Score').textContent='0.87';let h='<tr><th>录音</th><th>识别结果</th><th>最高相似度</th><th>目标片段</th><th>人工核验</th></tr>';files.forEach((f,i)=>h+=`<tr><td>${esc(f.name)}</td><td>${i===1?'未识别到':'识别到 '+esc($('#targetName').value)}</td><td>${i===1?'0.71':'0.'+(91-i*3)}</td><td><button class="btn sm e2play" data-id="${f.id}">试听</button></td><td><select><option>正确</option><option>误识别</option><option>漏识别</option></select></td></tr>`);$('#e2ResultTable').innerHTML=h;$$('.e2play').forEach(b=>b.onclick=()=>playFile(b.dataset.id,5,11));$('#e3Model').textContent=$('#e2Model').value;$('#e3Threshold').textContent=$('#e2Threshold').value;putRun({time:new Date().toLocaleString(),exp:'A01-E2',input:`${files.length}份测试录音`,route:$('#e2Model').value,params:`相似度阈值 ${$('#e2Threshold').value}`,result:`正确${Math.max(files.length-1,0)} / 误识别${files.length?1:0} / 平均相似度0.87`});toast('E2 实验完成')};
+
+/* E3 */
+$('#e3Start').onclick=()=>{$('#lockP95').textContent='470ms';$('#falseLock').textContent='1次';$('#relockP95').textContent='520ms';$('#lockStable').textContent='稳定';putRun({time:new Date().toLocaleString(),exp:'A01-E3',input:'实时/固定测试流',route:'实时锁定状态机',params:`锁定${$('#lockTh').value} / 解锁${$('#unlockTh').value} / ${$('#confirmWin').value}`,result:'P95锁定470ms / 误锁1次 / P95重新锁定520ms'});toast('E3 实验完成')};
+$$('.play-e1-sample').forEach(b=>b.onclick=()=>{if(!selectedE1File){toast('请先在 E1 选择建档录音');return}playFile(selectedE1File,Number(b.dataset.start),Number(b.dataset.end))});
+
+/* 模型注册：V0.1 只保留“本地模型”与“模型服务”两类 */
+
+// ---- 本地模型 ----
+const defaultLocalModels=[
+  {name:'Paraformer Streaming',capability:'流式语音识别',loadMode:'Python 模块',device:'自动',path:'paraformer-zh-streaming',note:'A02 流式语音实时识别',status:'未测试'},
+  {name:'pyannote Speaker Diarization',capability:'说话人发现',loadMode:'Python 模块',device:'自动',path:'pyannote/speaker-diarization',note:'A01-E1 说话人发现',status:'未测试'},
+  {name:'WeSpeaker ECAPA',capability:'目标说话人识别',loadMode:'Python 模块',device:'自动',path:'wespeaker-ecapa',note:'A01-E2 目标人物识别',status:'未测试'}
+];
+function getLocalModels(){
+  let x=JSON.parse(localStorage.getItem('miaowu_local_models_v01')||'null');
+  if(!x){x=defaultLocalModels;localStorage.setItem('miaowu_local_models_v01',JSON.stringify(x))}
+  return x
+}
+function saveLocalModels(x){localStorage.setItem('miaowu_local_models_v01',JSON.stringify(x));renderModelRegistry()}
+
+function renderLocalModels(){
+  const x=getLocalModels();
+  let h='<tr><th>模型名称</th><th>能力类型</th><th>加载方式</th><th>模型路径 / 标识</th><th>状态</th><th>操作</th></tr>';
+  x.forEach((m,i)=>h+=`<tr>
+    <td>${esc(m.name)}</td>
+    <td>${esc(m.capability)}</td>
+    <td>${esc(m.loadMode)} / ${esc(m.device)}</td>
+    <td>${esc(m.path)}</td>
+    <td class="${m.status==='测试通过'?'good':m.status==='测试失败'?'warn':''}">${esc(m.status)}</td>
+    <td><button class="btn sm edit-local-model" data-i="${i}">编辑</button> <button class="btn sm test-local-model" data-i="${i}">测试</button></td>
+  </tr>`);
+  $('#localModelTable').innerHTML=h;
+  $$('.edit-local-model').forEach(b=>b.onclick=()=>openLocalModel(Number(b.dataset.i)));
+  $$('.test-local-model').forEach(b=>b.onclick=()=>testStoredLocalModel(Number(b.dataset.i)));
+}
+function openLocalModel(i=-1){
+  const m=i>=0?getLocalModels()[i]:{name:'',capability:'流式语音识别',loadMode:'Python 模块',device:'自动',path:'',note:'',status:'未测试'};
+  $('#localModelEditIndex').value=i;
+  $('#localModelModalTitle').textContent=i>=0?'编辑本地模型':'注册本地模型';
+  $('#localName').value=m.name||'';
+  $('#localCapability').value=m.capability||'流式语音识别';
+  $('#localLoadMode').value=m.loadMode||'Python 模块';
+  $('#localDevice').value=m.device||'自动';
+  $('#localPath').value=m.path||'';
+  $('#localNote').value=m.note||'';
+  $('#localModelModal').classList.add('show');
+}
+function validateLocalModel(){
+  if(!$('#localName').value.trim()) return '请填写模型名称';
+  if(!$('#localPath').value.trim()) return '请填写模型路径 / 模型标识';
+  return '';
+}
+function testLocalForm(){
+  const err=validateLocalModel();if(err){toast(err);return false}
+  toast('本地模型加载测试通过（原型模拟）');return true;
+}
+function testStoredLocalModel(i){
+  let a=getLocalModels(),m=a[i];
+  a[i].status=m.path?'测试通过':'测试失败';
+  saveLocalModels(a);
+  toast(`${m.name}：${a[i].status}`);
+}
+$('#newLocalModelBtn').onclick=()=>openLocalModel(-1);
+$('#cancelLocalModel').onclick=()=>$('#localModelModal').classList.remove('show');
+$('#localModelModal').onclick=e=>{if(e.target===$('#localModelModal'))$('#localModelModal').classList.remove('show')};
+$('#testLocalModelBtn').onclick=()=>testLocalForm();
+$('#saveLocalModel').onclick=()=>{
+  const err=validateLocalModel();if(err){toast(err);return}
+  let a=getLocalModels(),i=Number($('#localModelEditIndex').value);
+  const oldStatus=i>=0?a[i].status:'未测试';
+  const m={
+    name:$('#localName').value,
+    capability:$('#localCapability').value,
+    loadMode:$('#localLoadMode').value,
+    device:$('#localDevice').value,
+    path:$('#localPath').value,
+    note:$('#localNote').value,
+    status:oldStatus
+  };
+  if(i>=0)a[i]=m;else a.push(m);
+  saveLocalModels(a);
+  $('#localModelModal').classList.remove('show');
+  toast('本地模型已保存');
+};
+
+// ---- 模型服务 ----
+const defaultModelServices=[
+  {provider:'OpenAI 兼容服务',name:'测试大模型服务',baseUrl:'',models:['Qwen3.6-35B-A3B','DeepSeek-V4-Flash','MiniMax M2.7'],defaultModel:'Qwen3.6-35B-A3B',timeout:'30',note:'用于辅助分析智能助手',status:'未测试'}
+];
+function getModelServices(){
+  let x=JSON.parse(localStorage.getItem('miaowu_model_services_v01')||'null');
+  if(!x){x=defaultModelServices;localStorage.setItem('miaowu_model_services_v01',JSON.stringify(x))}
+  return x
+}
+function saveModelServices(x){localStorage.setItem('miaowu_model_services_v01',JSON.stringify(x));renderModelRegistry();renderAgent()}
+function renderModelServices(){
+  const x=getModelServices();
+  let h='<tr><th>服务名称</th><th>Provider</th><th>API 地址</th><th>可用模型</th><th>默认模型</th><th>状态</th><th>操作</th></tr>';
+  x.forEach((m,i)=>h+=`<tr>
+    <td>${esc(m.name)}</td>
+    <td>${esc(m.provider)}</td>
+    <td>${esc(m.baseUrl||'未配置')}</td>
+    <td>${esc((m.models||[]).join(', '))}</td>
+    <td>${esc(m.defaultModel||'')}</td>
+    <td class="${m.status==='测试通过'?'good':m.status==='测试失败'?'warn':''}">${esc(m.status)}</td>
+    <td><button class="btn sm edit-model-service" data-i="${i}">编辑</button> <button class="btn sm test-model-service-row" data-i="${i}">测试</button></td>
+  </tr>`);
+  $('#modelServiceTable').innerHTML=h;
+  $$('.edit-model-service').forEach(b=>b.onclick=()=>openModelService(Number(b.dataset.i)));
+  $$('.test-model-service-row').forEach(b=>b.onclick=()=>testStoredModelService(Number(b.dataset.i)));
+}
+function openModelService(i=-1){
+  const m=i>=0?getModelServices()[i]:{provider:'OpenAI 兼容服务',name:'',baseUrl:'',models:[],defaultModel:'',timeout:'30',note:'',status:'未测试'};
+  $('#modelServiceEditIndex').value=i;
+  $('#modelServiceModalTitle').textContent=i>=0?'编辑模型服务':'注册模型服务';
+  $('#serviceProvider').value=m.provider||'OpenAI 兼容服务';
+  $('#serviceName').value=m.name||'';
+  $('#serviceBaseUrl').value=m.baseUrl||'';
+  $('#serviceApiKey').value='';
+  $('#serviceTimeout').value=m.timeout||'30';
+  $('#serviceModels').value=(m.models||[]).join(', ');
+  $('#serviceDefaultModel').value=m.defaultModel||'';
+  $('#serviceNote').value=m.note||'';
+  $('#modelServiceModal').classList.add('show');
+}
+function validateModelService(){
+  if(!$('#serviceName').value.trim()) return '请填写服务名称';
+  if(!$('#serviceBaseUrl').value.trim()) return '请填写 API 地址';
+  if(!$('#serviceModels').value.trim()) return '请至少填写一个可用模型名称';
+  return '';
+}
+function testModelServiceForm(){
+  const err=validateModelService();if(err){toast(err);return false}
+  toast('模型服务连接与默认模型测试通过（原型模拟）');return true;
+}
+function testStoredModelService(i){
+  let a=getModelServices(),m=a[i];
+  a[i].status=(m.baseUrl&&(m.models||[]).length)?'测试通过':'测试失败';
+  saveModelServices(a);
+  toast(`${m.name}：${a[i].status}`);
+}
+$('#newModelServiceBtn').onclick=()=>openModelService(-1);
+$('#cancelModelService').onclick=()=>$('#modelServiceModal').classList.remove('show');
+$('#modelServiceModal').onclick=e=>{if(e.target===$('#modelServiceModal'))$('#modelServiceModal').classList.remove('show')};
+$('#testModelServiceBtn').onclick=()=>testModelServiceForm();
+$('#saveModelService').onclick=()=>{
+  const err=validateModelService();if(err){toast(err);return}
+  let a=getModelServices(),i=Number($('#modelServiceEditIndex').value);
+  const oldStatus=i>=0?a[i].status:'未测试';
+  const models=$('#serviceModels').value.split(',').map(x=>x.trim()).filter(Boolean);
+  let def=$('#serviceDefaultModel').value.trim();
+  if(!def)def=models[0]||'';
+  const m={
+    provider:$('#serviceProvider').value,
+    name:$('#serviceName').value,
+    baseUrl:$('#serviceBaseUrl').value,
+    models,
+    defaultModel:def,
+    timeout:$('#serviceTimeout').value,
+    note:$('#serviceNote').value,
+    status:oldStatus
+  };
+  if(i>=0)a[i]=m;else a.push(m);
+  saveModelServices(a);
+  $('#modelServiceModal').classList.remove('show');
+  toast('模型服务已保存');
+};
+
+function renderModelRegistry(){renderLocalModels();renderModelServices()}
+
+/* 用户管理 */
+function getUsers(){let x=JSON.parse(localStorage.getItem('miaowu_users_v4')||'null');if(!x){x=[{name:'admin',role:'管理员',status:'启用'}];localStorage.setItem('miaowu_users_v4',JSON.stringify(x))}return x}
+function renderUsers(){let h='<tr><th>用户名</th><th>角色</th><th>状态</th><th>操作</th></tr>';getUsers().forEach((u,i)=>h+=`<tr><td>${esc(u.name)}</td><td>${esc(u.role)}</td><td><span class="user-badge">${esc(u.status)}</span></td><td><button class="btn sm toggle-user" data-i="${i}">${u.status==='启用'?'停用':'启用'}</button></td></tr>`);$('#userTable').innerHTML=h;$$('.toggle-user').forEach(b=>b.onclick=()=>{let a=getUsers(),i=Number(b.dataset.i);a[i].status=a[i].status==='启用'?'停用':'启用';localStorage.setItem('miaowu_users_v4',JSON.stringify(a));renderUsers()})}
+$('#newUserBtn').onclick=()=>$('#userModal').classList.add('show');$('#cancelUser').onclick=()=>$('#userModal').classList.remove('show');$('#saveUser').onclick=()=>{let a=getUsers();a.push({name:$('#newUsername').value||'user',role:$('#newRole').value,status:'启用'});localStorage.setItem('miaowu_users_v4',JSON.stringify(a));$('#userModal').classList.remove('show');renderUsers();toast('用户已新增')};
+
+/* 智能体 */
+function getAgent(){
+  return JSON.parse(localStorage.getItem('miaowu_agent_v4')||'{"name":"实验分析助手","service":"","model":"","temp":"0.2","max":"3000","prompt":"你是CIS Architecture Spike实验分析助手。请基于选中的多轮实验数据进行比较，识别技术路线优劣、参数敏感性、人工核验中的异常和适用边界，并给出简洁、可执行的推荐技术配置。不要只复述指标，要解释为什么这样选。"}')
+}
+function renderAgent(){
+  const a=getAgent(),services=getModelServices();
+  const modelPairs=[];
+  services.forEach((s,si)=>(s.models||[]).forEach(m=>modelPairs.push({value:si+'||'+m,label:s.name+' / '+m,service:s.name,model:m})));
+  $('#agentModel').innerHTML=modelPairs.map(x=>`<option value="${esc(x.value)}">${esc(x.label)}</option>`).join('');
+  $('#agentName').value=a.name;
+  $('#agentTemp').value=a.temp;
+  $('#agentMax').value=a.max;
+  $('#agentPrompt').value=a.prompt;
+  const matched=modelPairs.find(x=>x.service===a.service&&x.model===a.model);
+  if(matched)$('#agentModel').value=matched.value;
+  const selected=modelPairs.find(x=>x.value===$('#agentModel').value)||modelPairs[0];
+  $('#analysisAgentName').textContent=a.name;
+  $('#analysisAgentModel').textContent=selected?selected.label:'未配置';
+  $('#homeAgentName').textContent=a.name;
+  $('#homeAgentModel').textContent=selected?selected.label:'未配置';
+}
+$('#saveAgent').onclick=()=>{
+  const services=getModelServices(),val=$('#agentModel').value||'',parts=val.split('||'),si=Number(parts[0]),model=parts.slice(1).join('||');
+  const service=services[si];
+  const a={name:$('#agentName').value,service:service?.name||'',model:model||'',temp:$('#agentTemp').value,max:$('#agentMax').value,prompt:$('#agentPrompt').value};
+  localStorage.setItem('miaowu_agent_v4',JSON.stringify(a));
+  renderAgent();toast('智能体设置已保存');
+};
+$('#testAgent').onclick=()=>{
+  const label=$('#agentModel option:checked')?.textContent||'未配置模型';
+  toast(`已使用 ${label} 完成智能体测试（原型模拟）`);
+};
+
+/* 04 综合分析 */
+function renderAnalysisRuns(){
+ const runs=getRuns();
+ const groups=[['A01-E1','说话人发现实验'],['A01-E2','目标人物识别实验'],['A01-E3','实时识别实验']];
+ let out='';
+ groups.forEach(([exp,name])=>{const rs=runs.filter(r=>r.exp===exp);out+=`<div class="section-title">${name}</div><table class="data-table"><tr><th>选择</th><th>时间</th><th>输入</th><th>方案/参数</th><th>结果</th></tr>`+(rs.length?rs.map(r=>`<tr><td><input type="checkbox" class="analysis-run" value="${r.id}" checked></td><td>${esc(r.time)}</td><td>${esc(r.input)}</td><td>${esc(r.route)}<br/><span style="color:#98a2b3">${esc(r.params||'')}</span></td><td>${esc(r.result)}</td></tr>`).join(''):'<tr><td colspan="5">暂无实验结果</td></tr>')+'</table><div style="height:10px"></div>'});
+ $('#analysisRuns').innerHTML=out;
+ renderAgent();
+}
+$('#selectAllRuns').onclick=()=>$$('.analysis-run').forEach(c=>c.checked=true);
+function selectedRuns(){const ids=new Set($$('.analysis-run:checked').map(c=>c.value));return getRuns().filter(r=>ids.has(r.id))}
+$('#runAnalysis').onclick=()=>{
+ const rs=selectedRuns();if(!rs.length){toast('请至少选择一条实验结果');return}
+ const a=getAgent(),by=exp=>rs.filter(r=>r.exp===exp);
+ const e1=by('A01-E1'),e2=by('A01-E2'),e3=by('A01-E3');
+ let html=`<h4>智能综合分析</h4><div class="assistant-meta">分析助手：${esc(a.name)}　模型：${esc(a.model||$('#agentModel').value||'未配置')}　选中实验：${rs.length} 条</div>`;
+ html+=`<p><b>总体判断：</b>当前 A01 已形成一条清晰的技术验证链。建议不要追求每一步单个指标的最高值，而是优先选择在多轮实验中表现稳定、人工试听核验一致、参数不敏感的配置。</p><ul>`;
+ if(e1.length)html+=`<li><b>说话人发现：</b>已选择 ${e1.length} 轮结果。建议重点比较不同方法在“同一人被拆分、不同人被误合并”上的人工核验差异；若 pyannote 在多轮录音中稳定优于聚类路线，可作为主路线。</li>`;
+ if(e2.length)html+=`<li><b>目标人物识别：</b>已选择 ${e2.length} 轮结果。优先关注漏识别和误识别，而不是平均相似度本身；建议把能够跨不同录音环境稳定识别的模型/阈值作为推荐配置。</li>`;
+ if(e3.length)html+=`<li><b>实时识别：</b>已选择 ${e3.length} 轮结果。推荐以首次锁定 P95、误锁次数和重新锁定时延共同判断，不要单独压低锁定阈值换取表面上的低延迟。</li>`;
+ html+=`</ul><p><b>建议输出的 A01 技术基线：</b>① 说话人发现主路线；② 目标人物建档方式与识别模型/阈值；③ 实时锁定/解锁参数；④ 明确重叠讲话等仍需 A09 专项验证的边界。</p><p class="note">当前单 HTML 为交互原型，此处分析由前端模拟。正式开发时应将选中的实验记录序列化后，发送给系统设置中配置的辅助分析智能助手，并把模型原始响应和最终报告一起保存到实验数据仓。</p>`;
+ $('#assistantResult').innerHTML=html;$('#assistantResult').classList.add('show');localStorage.setItem('miaowu_last_analysis_v4',JSON.stringify({runs:rs,html,agent:a,time:new Date().toISOString()}));toast('综合分析完成（原型模拟）');
+};
+
+/* 报告 */
+function getReports(){return JSON.parse(localStorage.getItem('miaowu_reports_v4')||'[]')}
+function addReport(name){let a=getReports();a.unshift({name,time:new Date().toLocaleString()});localStorage.setItem('miaowu_reports_v4',JSON.stringify(a));renderReports();refreshHome()}
+function renderReports(){let h='<tr><th>报告名称</th><th>生成时间</th></tr>';getReports().forEach(r=>h+=`<tr><td>${esc(r.name)}</td><td>${esc(r.time)}</td></tr>`);if(!getReports().length)h+='<tr><td colspan="2">暂无报告</td></tr>';$('#warehouseReportTable').innerHTML=h}
+function download(name,text,type='text/plain;charset=utf-8'){const b=new Blob([text],{type}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),500);addReport(name)}
+function reportPayload(){const rs=selectedRuns(),last=JSON.parse(localStorage.getItem('miaowu_last_analysis_v4')||'null');return{scene:'A01',selected_runs:rs,analysis:last?.html?.replace(/<[^>]+>/g,' ')||'',agent:getAgent(),generated_at:new Date().toISOString()}}
+$('#downloadSceneMd').onclick=()=>{const p=reportPayload();let md='# A01 · 目标人物声纹建立与实时识别｜综合实验报告\n\n## 选中的实验结果\n'+p.selected_runs.map(r=>`- **${r.exp}**｜${r.time}｜${r.route}｜${r.params||''}｜${r.result}`).join('\n')+'\n\n## 智能综合分析\n'+(p.analysis||'尚未执行综合分析。')+'\n';download('A01_综合实验报告.md',md,'text/markdown;charset=utf-8')};
+$('#downloadSceneCsv').onclick=()=>{const rs=selectedRuns();let s='\ufeff时间,实验,输入,方案,参数,结果\n'+rs.map(r=>[r.time,r.exp,r.input,r.route,r.params||'',r.result].map(x=>`"${String(x).replaceAll('"','""')}"`).join(',')).join('\n');download('A01_所选实验数据.csv',s,'text/csv;charset=utf-8')};
+$('#downloadSceneJson').onclick=()=>download('A01_实验证据.json',JSON.stringify(reportPayload(),null,2),'application/json;charset=utf-8');
+
+/* 首页 */
+async function refreshHome(){
+  try{$('#homeFileCount').textContent=(await allFiles()).length}catch(e){}
+  $('#homeRunCount').textContent=getRuns().length;
+  $('#homeReportCount').textContent=getReports().length;
+  const a=getAgent();
+  $('#homeAgentName').textContent=a.name;
+  $('#homeAgentModel').textContent=(a.service&&a.model)?(a.service+' / '+a.model):'未配置';
+}
+
+/* 启动 */
+renderFiles();renderModelRegistry();renderUsers();renderAgent();renderReports();refreshHome();
+</script>
+</body>
+</html>

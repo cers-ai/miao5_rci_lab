@@ -1,0 +1,25 @@
+[project]
+name = "miaowu-rci-lab"
+version = "0.1.0"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+  "fastapi>=0.115,<1", "uvicorn[standard]>=0.34,<1", "sqlalchemy>=2.0,<3",
+  "python-multipart>=0.0.20", "httpx>=0.28,<1", "cryptography>=44",
+  "numpy>=1.26,<3", "soundfile>=0.13", "scikit-learn>=1.6",
+  "torch==2.8.0", "torchaudio==2.8.0", "torchcodec==0.7.0", "funasr>=1.2.6,<2",
+  "modelscope>=1.24,<2", "huggingface-hub>=0.34,<1", "pyannote.audio>=4.0,<5",
+  "pytest>=8,<9", "websockets>=14", "setuptools<81", "onnxruntime>=1.21", "kaldi-native-fbank>=1.20"
+]
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+torchaudio = { index = "pytorch-cpu" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
