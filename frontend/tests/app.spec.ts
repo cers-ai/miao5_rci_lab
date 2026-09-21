@@ -2,6 +2,9 @@ import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import fs from 'node:fs';
 
+const evidenceDir = path.resolve(process.env.MIAOWU_BROWSER_EVIDENCE_DIR || '../artifacts/a01-v2/browser');
+fs.mkdirSync(evidenceDir, { recursive: true });
+
 test('真实浏览器：登录、导航、模型、真人语音E1、核验、建档和报告', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
@@ -11,11 +14,11 @@ test('真实浏览器：登录、导航、模型、真人语音E1、核验、建
   await page.getByRole('button', { name: '登录', exact: true }).click();
   await expect(page.getByRole('heading', { name: '每一个结论，都从真实实验开始。' })).toBeVisible();
   await expect(page.getByText('WeSpeaker 中文 ResNet34-LM', { exact: true })).toBeVisible();
-  await page.screenshot({ path: '../workspace/logs/home-desktop.png', fullPage: true });
+  await page.screenshot({ path: path.join(evidenceDir, 'home-desktop.png'), fullPage: true });
   await page.getByRole('button', { name: '系统设置', exact: true }).click();
   await expect(page.getByText('WeSpeaker 中文 ResNet34-LM', { exact: true })).toBeVisible();
   await expect(page.getByText('需要 HF 模型授权后下载')).toBeVisible();
-  await page.screenshot({ path: '../workspace/logs/settings-desktop.png', fullPage: true });
+  await page.screenshot({ path: path.join(evidenceDir, 'settings-desktop.png'), fullPage: true });
   await page.getByRole('button', { name: 'A02 流式语音实时识别' }).click();
   await expect(page.getByText('等待下一阶段设计与开发')).toBeVisible();
   await page.getByRole('button', { name: '进入当前 A01 实验' }).click();
@@ -35,7 +38,7 @@ test('真实浏览器：登录、导航、模型、真人语音E1、核验、建
   await results.getByLabel('核验备注').fill('浏览器自动测试：真实语音链路试听按钮验证，非人工准确率结论');
   await results.getByRole('button', { name: '保存', exact: true }).click();
   await expect(results.getByText('已保存', { exact: true })).toBeVisible();
-  await page.screenshot({ path: '../workspace/logs/e1-desktop.png', fullPage: true });
+  await page.screenshot({ path: path.join(evidenceDir, 'e1-desktop.png'), fullPage: true });
   await page.getByRole('button', { name: '选择目标人物，进入 E2' }).click();
   await page.getByLabel('目标人物名称', { exact: true }).fill('浏览器测试目标');
   await page.getByRole('checkbox', { name: /SPEAKER_01/ }).check();
@@ -52,7 +55,7 @@ test('真实浏览器：登录、导航、模型、真人语音E1、核验、建
   const e3 = page.locator('section.panel').filter({ has: page.getByRole('heading', { name: '2. 实时观察与指标' }) });
   await expect(e3.getByText('已完成', { exact: true })).toBeVisible({ timeout: 60000 });
   await expect(e3.getByText('未提供人工 Ground Truth，正式准确率和时延指标不可计算', { exact: true })).toBeVisible();
-  await page.screenshot({ path: '../workspace/logs/e3-desktop.png', fullPage: true });
+  await page.screenshot({ path: path.join(evidenceDir, 'e3-desktop.png'), fullPage: true });
   await page.getByRole('button', { name: /04 综合结论与报告/ }).click();
   await page.getByRole('button', { name: '选择全部已完成实验' }).click();
   await page.getByRole('button', { name: '生成综合实验报告', exact: true }).click();
@@ -74,7 +77,7 @@ test('小屏幕布局与账号退出', async ({ page }) => {
   await page.getByRole('button', { name: '登录', exact: true }).click();
   await expect(page.getByRole('heading', { name: '每一个结论，都从真实实验开始。' })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
-  await page.screenshot({ path: '../workspace/logs/home-mobile.png', fullPage: true });
+  await page.screenshot({ path: path.join(evidenceDir, 'home-mobile.png'), fullPage: true });
   await page.getByRole('button', { name: '退出登录' }).click();
   await expect(page.getByRole('heading', { name: '登录工作台' })).toBeVisible();
 });
@@ -112,5 +115,5 @@ test('真实浏览器 WebSocket → 模型：发送公开真人PCM并保存实�
   await page.getByRole('button', { name: /03 实时识别实验/ }).click();
   const row = page.locator('tr').filter({ hasText: runId.slice(0, 10) });
   await expect(row.getByText('已完成', { exact: true })).toBeVisible();
-  await page.screenshot({ path: '../workspace/logs/microphone-desktop.png', fullPage: true });
+  await page.screenshot({ path: path.join(evidenceDir, 'microphone-desktop.png'), fullPage: true });
 });

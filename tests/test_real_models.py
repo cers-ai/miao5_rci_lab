@@ -36,7 +36,7 @@ def test_real_embedding_discriminates_speakers(real_models):
         results[ident]={'same_speaker':same,'different_speaker':different,'dimensions':len(va)}
     assert models.speech_segments(a)
     assert models.speech_segments(np.zeros(48000,dtype='float32'))==[]
-    (Path(__file__).resolve().parents[1]/'workspace/logs/real-embedding-test.json').write_text(json.dumps(results,indent=2),encoding='utf-8')
+    (db.WORK/'logs/real-embedding-test.json').write_text(json.dumps(results,indent=2),encoding='utf-8')
 
 
 def test_real_full_experiment_pipeline(admin,real_models):
@@ -80,7 +80,7 @@ def test_real_full_experiment_pipeline(admin,real_models):
     evidence=admin.get(f"/api/reports/{report.json()['id']}/json").json()
     assert len(evidence['selected_runs'])==5
     evidence['test_note']='真人公开语音组合的自动链路验证，不替代真实会议质量验收'
-    out=Path(__file__).resolve().parents[1]/'workspace/logs/real-pipeline-test.json'
+    out=db.WORK/'logs/real-pipeline-test.json'
     out.write_text(json.dumps(evidence,ensure_ascii=False,indent=2),encoding='utf-8')
     # Model mismatch must fail and be persisted, never silently compare unrelated embedding spaces.
     bad=admin.post('/api/a01/e2/run',json={'profile_id':p['id'],'file_ids':testing,'model_id':'campp'}).json()

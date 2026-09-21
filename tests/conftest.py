@@ -5,6 +5,22 @@ import pytest
 
 os.environ['MIAOWU_WORKSPACE'] = tempfile.mkdtemp(prefix='miaowu-tests-')
 
+
+def pytest_report_header(config):
+    return f"Isolated workspace: {os.environ['MIAOWU_WORKSPACE']}"
+
+
+def pytest_sessionfinish(session, exitstatus):
+    """Export the evidence location without ever writing into production logs."""
+    junit = session.config.getoption('xmlpath', default=None)
+    if junit:
+        import json
+        destination = Path(junit).resolve().parent
+        destination.mkdir(parents=True, exist_ok=True)
+        (destination / 'test-workspace.json').write_text(json.dumps({
+            'workspace': os.environ['MIAOWU_WORKSPACE'], 'exit_status': int(exitstatus)
+        }, indent=2), encoding='utf-8')
+
 @pytest.fixture(scope='session')
 def client():
     from fastapi.testclient import TestClient

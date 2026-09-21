@@ -9,3 +9,4 @@ __pycache__/
 workspace/
 *.log
 .env
+artifacts/a01-v2/
